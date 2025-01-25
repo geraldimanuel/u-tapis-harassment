@@ -8,12 +8,15 @@
             class="bg-black h-[700px] rounded-3xl bg-[url(/img/background.png)] bg-cover bg-center flex flex-col gap-4 items-center mt-4 px-12">
             <div class="bg-white rounded-lg w-full mt-7 p-3 flex items-center justify-between">
                 <div class="flex items-center gap-12">
-                    <p class="font-montserrat font-bold uppercase text-[#005696] text-lg border-r-2 pe-6 tracking-wide">U | Harassment</p>
+                    <p class="font-montserrat font-bold uppercase text-[#005696] text-lg border-r-2 pe-6 tracking-wide">
+                        U | Harassment</p>
                     <p class="font-montserrat font-semibold -ms-6 text-[#005696] tracking">Produk</p>
                     <p class="font-montserrat font-semibold text-[#005696] tracking">Fitur</p>
                     <p class="font-montserrat font-semibold text-[#005696] tracking">Kontak</p>
                 </div>
-                <div class="font-montserrat shadow-md rounded-lg py-1 px-3 text-md font-medium border-[1px] border-gray-100">Talk to developer</div>
+                <div
+                    class="font-montserrat shadow-md rounded-lg py-1 px-3 text-md font-medium border-[1px] border-gray-100">
+                    Talk to developer</div>
             </div>
             <div class="flex flex-col gap-4 items-center justify-center px-40 mt-24">
                 <p class="text-white font-montserrat font-semibold text-6xl text-center">U-Tapis Sistem Online
@@ -43,18 +46,46 @@
                 </div>
             </div>
             <hr class="h-[2px] bg-gray-200 border-0">
-            <textarea placeholder="Masukkan teks disini..."
-                class="w-full rounded-xl p-3 text-gray-700 font-medium font-montserrat focus:outline-none focus:ring-2 focus:ring-[#2A70CE] transition duration-200 h-44 resize-none"></textarea>
+            <textarea placeholder="Masukkan teks disini..." v-model="inputText"
+                class="w-full rounded-xl p-3 text-gray-700 font-medium font-montserrat focus:outline-none focus:ring-2 focus:ring-[#2A70CE] transition duration-200 h-44 resize-none"
+                @keydown.enter.prevent="handleDetect"></textarea>
             <div class="flex justify-between items-center">
                 <div class="flex gap-3 text-gray-600">
-                    <Icon name="fluent:arrow-reset-24-filled" size="18" />
-                    <Icon name="tabler:copy" size="18" />
+                    <button @click="resetInput"
+                        class="flex items-center gap-1 cursor-pointer hover:text-black transition">
+                        <Icon name="fluent:arrow-reset-24-filled" size="18" />
+                    </button>
+
+                    <button @click="pasteFromClipboard"
+                        class="flex items-center gap-1 cursor-pointer hover:text-black transition">
+                        <Icon name="fa6-regular:paste" size="18" />
+                    </button>
                 </div>
-                <div
-                    class="bg-gradient-to-r from-[#2A70CE] to-[#4497E7] text-white p-3 shadow-md rounded-md font-semibold text-sm flex items-center justify-center gap-2">
-                    <Icon name="fluent:sparkle-32-filled" size="18" />
-                    <p>
-                        Mulai Deteksi
+                <div class="bg-gradient-to-r from-[#2A70CE] to-[#4497E7] text-white p-3 shadow-md rounded-md font-semibold text-sm flex items-center justify-center gap-2 cursor-pointer"
+                    @click="!isLoading && handleDetect">
+                    <template v-if="isLoading">
+                        <Icon name="eos-icons:loading" size="18" class="animate-spin" />
+                        <p>Loading...</p>
+                    </template>
+                    <template v-else>
+                        <Icon name="fluent:sparkle-32-filled" size="18" />
+                        <p>Mulai Deteksi</p>
+                    </template>
+                </div>
+            </div>
+        </section>
+        <section v-if="detectionResult" id="result"
+            class="mx-72 mt-5 rounded-xl flex flex-col bg-white p-5 gap-5 border-[3px] border-gray-100">
+            <p class="font-montserrat font-semibold text-lg">Hasil Deteksi</p>
+            <div class="grid grid-cols-3 gap-5">
+                <div v-for="(value, key) in detectionResult.probabilities" :key="key" :class="{
+                    'bg-blue-100 border-blue-500': value === maxProbability,
+                    'bg-white border-gray-200': value !== maxProbability
+                }" class="rounded-xl p-5 flex flex-col items-center shadow-lg border-[3px]">
+                    <p class="font-montserrat font-semibold text-lg">{{ key }}</p>
+                    <p class="font-montserrat text-xl font-bold text-gray-800">{{ value.toFixed(2) }}%</p>
+                    <p v-if="value === maxProbability" class="font-montserrat text-sm font-semibold text-blue-500">
+                        Highest Probability
                     </p>
                 </div>
             </div>
@@ -100,18 +131,8 @@
                 </div>
             </div>
         </section>
-        <section
-            id="footer"
-        >
-            <div class="flex items-center justify-center gap-5 mt-20">
-                <img class="w-44"
-                    src="https://seeklogo.com/images/U/universitas-multimedia-nusantara-umn-logo-6F686AD356-seeklogo.com.png"
-                    alt="">
-                <img class="w-44"
-                    src="https://res.cloudinary.com/tia-img/image/fetch/t_company_avatar/https%3A%2F%2Fcdn.techinasia.com%2Fdata%2Fimages%2F06bef4f5fa8a57fb06b24429dba20da1.png"
-                    alt="">
-            </div>
-            <div class="flex items-center justify-center gap-5 mt-10">
+        <section id="footer">
+            <div class="flex items-center justify-center gap-5 mt-32 mb-8">
                 <p class="font-montserrat font-semibold text-gray-500">© 2025 U-Tapis</p>
                 <p class="font-montserrat font-semibold text-gray-500">Kebijakan Privasi</p>
                 <p class="font-montserrat font-semibold text-gray-500">Syarat dan Ketentuan</p>
@@ -119,3 +140,46 @@
         </section>
     </div>
 </template>
+<script setup lang="ts">
+import { ref, computed } from 'vue';
+
+const inputText = ref('');
+const detectionResult = ref<{ label: string; probabilities: Record<string, number> } | null>(null);
+const isLoading = ref(false);
+
+const maxProbability = computed(() => {
+    if (!detectionResult.value) return null;
+    return Math.max(...Object.values(detectionResult.value.probabilities));
+});
+
+async function pasteFromClipboard() {
+    try {
+        const text = await navigator.clipboard.readText();
+        inputText.value = text;
+    } catch (error) {
+    }
+}
+
+function resetInput() {
+    inputText.value = '';
+}
+
+async function handleDetect() {
+    try {
+        isLoading.value = true;
+
+        const res = await $fetch('http://localhost:5000/predict', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: inputText.value }),
+        });
+
+        detectionResult.value = res as { label: string; probabilities: Record<string, number> };
+    } catch (error) {
+    }
+
+    isLoading.value = false;
+}
+</script>
